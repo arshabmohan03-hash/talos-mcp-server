@@ -1,0 +1,11 @@
+node_modules
+dist
+src/widgets/node_modules
+src/widgets/.next
+npm-debug.log
+.env
+.env.*
+uploads
+server*.log
+*.out.log
+*.err.log
