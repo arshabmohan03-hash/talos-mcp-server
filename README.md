@@ -1,8 +1,53 @@
-# Talos MCP Server
+# Talos, an AI powered vulnerability detection and auto-remediation via MCP
 
-NitroStack MCP server for the Talos AI Security Assistant. It exposes the
-existing Python scanner, brute-force detector, security utilities, research
-search, resource library, alerting, and mitigation generator as MCP tools.
+> Talos is an AI-powered cybersecurity assistant and brute-force detection platform built for defensive security analysis, incident response, phishing/link safety checks, research discovery, security reporting, and practical remediation workflows.
+
+![Model Context Protocol](https://img.shields.io/badge/Model%20Context%20Protocol-MCP-blue)
+![Built with Nitrostack](https://img.shields.io/badge/Built%20with-Nitrostack-0A66FF)
+![Status](https://img.shields.io/badge/status-live-brightgreen)
+
+**Talos, an AI powered vulnerability detection and auto-remediation via MCP** is an [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server that extends AI assistants with real defensive-security tools. It is built for NitroStack/NitroCloud deployment and can be connected to MCP-compatible clients such as Claude Desktop, Cursor, NitroChat, and other AI agent environments.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [What is MCP?](#what-is-mcp)
+- [Features](#features)
+- [Tools](#tools)
+- [Live Demo](#live-demo)
+- [Getting Started](#getting-started)
+- [Connect to an MCP Client](#connect-to-an-mcp-client)
+- [Deploy Your Own MCP App](#deploy-your-own-mcp-app)
+- [Environment Variables](#environment-variables)
+- [Explore More MCP Apps](#explore-more-mcp-apps)
+- [FAQ](#faq)
+- [Keywords](#keywords)
+- [License](#license)
+
+## Overview
+
+Talos combines a TypeScript/NitroStack MCP server with a bundled standalone security runtime. It exposes structured tools for passive website scanning, CVE lookup, authentication-log analysis, research-paper discovery, phishing and malicious-link detection, password checks, JWT decoding, IP investigation, security report generation, email alerting, and defensive resource search.
+
+Instead of giving generic text-only answers, an AI assistant can call the correct Talos MCP tool directly, inspect live results, generate evidence-backed reports, and move from detection to investigation and remediation in one workflow.
+
+The project is designed for standalone NitroStack hosting. When Python is unavailable in the hosting runtime, Talos can run its Node-compatible fallback tools with `TALOS_FORCE_NODE_TOOLS=true`.
+
+## What is MCP?
+
+The **Model Context Protocol (MCP)** is an open standard that lets AI assistants securely connect to external tools, data sources, and services. Instead of being limited to static model knowledge, an AI assistant can call MCP servers to fetch live data, run actions, and integrate with real systems.
+
+This project is one such MCP server. Learn more about building and shipping MCP apps at [nitrostack.ai](https://nitrostack.ai).
+
+## Features
+
+- **MCP-native** - works with MCP-compatible clients.
+- **NitroStack ready** - deployable as a standalone NitroStack MCP app.
+- **Security toolbox** - website scanning, CVE lookup, phishing/link safety, IP lookup, password utilities, JWT decoding, and more.
+- **Research support** - academic/security research search and paper lookup tools.
+- **Report generation** - creates structured security reports without emailing unless explicitly requested.
+- **Email capable** - can send alerts or report summaries when SMTP/Gmail settings are configured.
+- **Node-compatible fallback mode** - works in NitroCloud-style Node-only hosting.
+- **Secret-safe repo** - API keys and mail credentials belong in environment variables, not in committed code.
 
 ## Tools
 
@@ -30,64 +75,89 @@ search, resource library, alerting, and mitigation generator as MCP tools.
 - `get_resource_page`
 - `list_resources`
 
-`generate_security_report` returns and saves a report by default. It does not
-email anything unless `send_email=true` is explicitly passed. Use
-`send_report_email` or `send_email` only when the user asks to email, send,
-forward, or share the information.
+## Live Demo
 
-## Resources and Prompts
+**Live MCP endpoint:**
 
-Resources:
-
-- `talos://overview`
-- `talos://security-tools`
-- `talos://resources`
-- `talos://last-report`
-
-Prompts:
-
-- `talos_website_security_review`
-- `talos_full_security_report`
-- `talos_research_paper_lookup`
-- `talos_link_safety_check`
-- `talos_bruteforce_incident`
-- `talos_tool_health_check`
-
-## Local Setup
-
-From the repository root, install the Python app dependencies first:
-
-```powershell
-pip install -r requirements.txt
+```text
+https://mentora-6a-mentora-builders-amrita-university-amritapuri-campus.app.nitrocloud.ai/mcp
 ```
 
-Then install and run the MCP server:
+Point your MCP client at the endpoint above to try it instantly. Prefer your own hosted setup? Deploy this repo on [NitroStack](https://nitrostack.ai).
 
-```powershell
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+ for NitroStack builds.
+- npm.
+- An MCP-compatible client such as NitroChat, Claude Desktop, Cursor, or another MCP client.
+
+### Installation
+
+```bash
+git clone https://github.com/arshabmohan03-hash/talos-mcp-server.git
 cd talos-mcp-server
 npm install
-Copy-Item .env.example .env
-npm run dev
 ```
 
-The server defaults to NitroStack dual transport with HTTP on port `3002` and
-base path `/mcp`.
+### Configuration
 
-```powershell
+Copy the example environment file and add your own values:
+
+```bash
+cp .env.example .env
+```
+
+For NitroCloud/Node-only deployments, use:
+
+```text
+NODE_ENV=production
+PORT=3002
+MCP_TRANSPORT=dual
+MCP_TRANSPORT_TYPE=dual
+MCP_HOST=0.0.0.0
+HOST=0.0.0.0
+MCP_BASE_PATH=/mcp
+TALOS_APP_ROOT=./app-runtime
+TALOS_FORCE_NODE_TOOLS=true
+TALOS_TOOL_TIMEOUT_MS=60000
+```
+
+### Run Locally
+
+```bash
+npm run build
+node dist/index.js
+```
+
+Health check:
+
+```bash
 curl http://localhost:3002/mcp/health
 ```
 
-## Upload only `talos-mcp-server`
+## Connect to an MCP Client
 
-If your deploy UI only accepts this MCP folder, generate the embedded app
-snapshot first:
+Add this server to your MCP client configuration:
 
-```powershell
-cd C:\Users\ignat\Downloads\AI_BruteForce_Detector-3\talos-mcp-server
-npm run prepare:standalone
+```json
+{
+  "mcpServers": {
+    "talos-mcp-server": {
+      "url": "https://mentora-6a-mentora-builders-amrita-university-amritapuri-campus.app.nitrocloud.ai/mcp"
+    }
+  }
+}
 ```
 
-Then upload `talos-mcp-server` and use:
+Restart your client and the Talos tools will be available to your AI assistant.
+
+## Deploy Your Own MCP App
+
+Upload this repository or connect it to NitroStack.
+
+Recommended NitroStack settings:
 
 ```text
 Build command:
@@ -110,141 +180,68 @@ TALOS_FORCE_NODE_TOOLS=true
 TALOS_TOOL_TIMEOUT_MS=60000
 ```
 
-`TALOS_FORCE_NODE_TOOLS=true` is recommended for NitroCloud-style Node-only
-deployments. It avoids calling `python` and uses the TypeScript fallback tools
-for research search, resource-library search, passive website/header scans,
-CVEs, IP lookup, Gmail SMTP email sending, hashing, JWT decode, passwords,
-blocklist generation, research-paper lookup, phishing/link-safety detection,
-security-report generation, self-testing, and the small built-in security-tool
-catalog. Local/full deployments can omit it to use the original Python bridge
-for Python-backed tools; Node-only report, link-safety, and email tools still
-route through TypeScript.
+Want to build and ship an MCP server like this one? [NitroStack](https://nitrostack.ai) lets you create, deploy, and host MCP apps without managing infrastructure.
 
-Do not upload local `.env` or `key.json`; set real secrets in the deployment
-environment.
+## Environment Variables
 
-Do not commit or upload embedded test keys. Keep API keys, Gmail/SMTP app
-passwords, Firebase credentials, and threat-intel provider keys in deployment
-environment variables only.
-
-`analyze_link_safety` uses static URL checks, DNS, redirects, lightweight HTTP
-inspection, URLhaus, and configured threat-intel providers. Configure
-`GOOGLE_SAFE_BROWSING_API_KEY`, `VIRUSTOTAL_API_KEY`, `PHISHTANK_API_KEY`, and
-`URLSCAN_API_KEY` in the deployment environment when you want provider-backed
-lookups.
-
-## Nitro Studio
-
-This folder is standalone for Nitro Studio. Open the folder itself:
+Set these in your deployment environment as needed:
 
 ```text
-C:\Users\ignat\Downloads\AI_BruteForce_Detector-3\talos-mcp-server
+GOOGLE_SAFE_BROWSING_API_KEY=
+VIRUSTOTAL_API_KEY=
+PHISHTANK_API_KEY=
+URLSCAN_API_KEY=
+CEREBRAS_API_KEY=
+CEREBRAS_API_KEY_SECONDARY=
+GROQ_API_KEYS=
+OPENALEX_API_KEY=
+CORE_API_KEY=
+SEMANTIC_SCHOLAR_API_KEY=
+ALERT_EMAIL=
+ALERT_EMAIL_PASSWORD=
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SECURITY_ALERT_EMAIL=
+SLACK_WEBHOOK_URL=
 ```
 
-Studio uses `STDIO` in development. Leave `MCP_TRANSPORT` and
-`MCP_TRANSPORT_TYPE` unset for Studio so the server starts as pure stdio. For
-hosted/HTTP deployment, set them to `dual` as shown above.
+Do not commit `.env`, app passwords, API keys, Firebase service-account files, or local test-key files.
 
-If Studio was already showing "Connection not found", close that failed project
-entry and open this folder again after running:
+## Explore More MCP Apps
 
-```powershell
-cd C:\Users\ignat\Downloads\AI_BruteForce_Detector-3\talos-mcp-server
-npm install
-npm run prepare:standalone
-npm run build
-```
+- Discover and share MCP projects with the community on [r/mcptothemoon](https://www.reddit.com/r/mcptothemoon/).
+- Browse MCP apps and build your own on [NitroStack](https://nitrostack.ai).
 
-## Upload the whole project
+## FAQ
 
-If your deploy UI accepts the full `AI_BruteForce_Detector-3` folder, use that
-as the project root instead:
+### What is an MCP server?
 
-```text
-Project root:
-C:\Users\ignat\Downloads\AI_BruteForce_Detector-3
+An MCP server implements the Model Context Protocol to expose tools, resources, and prompts that AI assistants can call. It lets an AI model take useful actions and access live data through a structured interface.
 
-Build command:
-npm install
-npm run build:mcp-deploy
+### What does Talos do?
 
-Runtime:
-node talos-mcp-server/dist/index.js
+Talos provides defensive cybersecurity tools through MCP, including passive website security checks, brute-force log analysis, CVE lookup, phishing/link safety detection, security report generation, research lookup, and email alert workflows.
 
-Environment:
-NODE_ENV=production
-PORT=3002
-MCP_TRANSPORT=dual
-MCP_TRANSPORT_TYPE=dual
-MCP_HOST=0.0.0.0
-HOST=0.0.0.0
-MCP_BASE_PATH=/mcp
-TALOS_APP_ROOT=.
-TALOS_PYTHON=python
-TALOS_TOOL_TIMEOUT_MS=60000
-```
+### Does report generation automatically send email?
 
-## Environment
+No. `generate_security_report` returns and saves a report by default. Email is sent only when the user explicitly asks to email, forward, send, or share the report, or when an email-specific tool is called.
 
-The TypeScript MCP server reads `talos-mcp-server/.env`. The Python Talos app
-continues to read the root `.env` and the normal app settings.
+### Which AI clients does this work with?
 
-Important MCP variables:
+Any MCP-compatible client that can connect to an HTTP MCP endpoint, including NitroChat, Claude Desktop, Cursor, and other agent environments.
 
-```text
-PORT=3002
-MCP_HOST=0.0.0.0
-MCP_BASE_PATH=/mcp
-MCP_TRANSPORT=dual
-TALOS_APP_ROOT=./app-runtime
-TALOS_TOOL_TIMEOUT_MS=60000
-```
+### How do I deploy my own MCP app?
 
-For NitroCloud/Node-only hosting, add:
+Use [NitroStack](https://nitrostack.ai) to build, deploy, and host MCP apps without managing server infrastructure.
 
-```text
-TALOS_FORCE_NODE_TOOLS=true
-```
+## Keywords
 
-For local/full hosting with Python installed, omit `TALOS_FORCE_NODE_TOOLS` and
-optionally set `TALOS_PYTHON=python` or `TALOS_PYTHON=python3`.
+`Talos` - `MCP` - `Model Context Protocol` - `MCP server` - `NitroStack` - `NitroCloud` - `AI security assistant` - `vulnerability detection` - `brute-force detection` - `phishing detection` - `link safety` - `security report` - `CVE lookup` - `cybersecurity tools` - `AI agents`
 
-## NitroCloud / NitroStack Deploy
+## License
 
-```powershell
-npm install
-npm run build
-nitrostack login
-nitrostack deploy
-```
+MIT (C) 2026
 
-Set deployment secrets/env vars for the Talos Python app as needed:
-`CEREBRAS_API_KEY`, alert settings, Firebase settings, scanner settings, and
-any research API keys.
+---
 
-If the hosting runtime has no Python executable, keep:
-
-```text
-TALOS_FORCE_NODE_TOOLS=true
-TALOS_APP_ROOT=./app-runtime
-```
-
-If you build on a platform where Python is optional, `npm run build:deploy` will
-continue when no Python executable is found. Set `TALOS_REQUIRE_PYTHON=1` when
-you want that build to fail instead.
-
-## Docker
-
-Prepare the standalone snapshot, then build from this folder:
-
-```powershell
-npm run prepare:standalone
-docker build -t talos-mcp-server .
-docker run --env-file .env -p 3002:3002 talos-mcp-server
-```
-
-## Safety
-
-Talos tools are intended for defensive, authorized use. The website scanner is
-passive/non-destructive, and `generate_blocklist` only returns rules for review;
-it does not apply firewall changes.
+Built with the Model Context Protocol on [NitroStack](https://nitrostack.ai). Share MCP apps with the community on [r/mcptothemoon](https://www.reddit.com/r/mcptothemoon/).
